@@ -5,29 +5,27 @@ from SacaeMap import *
 
 # Turn Debug mode on and off
 DEBUG = True
+
 WHITE = [255, 255, 255]
 BLACK = [0  , 0  , 0  ]
 
-# Initialize Player and Position
-Lord = pygame.image.load('lyn.png')
+# Initialize Players and Positions
+Lord = pygame.image.load('CharacterSprites/lyn.png')
 playerPos1 = [MAPWIDTH-1,MAPHEIGHT-1]
-Mage = pygame.image.load('mage.png')
+Mage = pygame.image.load('CharacterSprites/mage.png')
 playerPos2 = [MAPWIDTH-2,MAPHEIGHT-1]
-Archer = pygame.image.load('archer.png')
+Archer = pygame.image.load('CharacterSprites/archer.png')
 playerPos3 = [MAPWIDTH-3,MAPHEIGHT-1]
-Bard = pygame.image.load('bard.png')
+Bard = pygame.image.load('CharacterSprites/bard.png')
 playerPos4 = [MAPWIDTH-4,MAPHEIGHT-1]
 
 PLAYERS = [Lord, Mage, Archer, Bard]
 PLAYER_NAMES = ['Lord', 'Mage', 'Archer', 'Bard']
-
 player_pos_coords = [playerPos1, playerPos2, playerPos3, playerPos4]
 
 new_coord = []
 walk_delay = 1
 walk_cd = 0
-step_delay = 1
-step_cd = 0
 
 #Initialize Clocks
 clock1 = pygame.time.Clock()
@@ -36,6 +34,7 @@ clock3 = pygame.time.Clock()
 clock4 = pygame.time.Clock()
 
 CLOCKS = [clock1, clock2, clock3, clock4]
+HOTKEYS = [Lord, Mage, Archer, Bard]
 
 # First player is default
 PLAYER = PLAYERS[0]
@@ -43,9 +42,9 @@ PLAYER_NAME = PLAYER_NAMES[0]
 playerPos = player_pos_coords[0]
 clock = CLOCKS[0]
 
-# Initialize Cursor
-Cursor = pygame.image.load('cursor.png')
-cursorPos = [playerPos[0],playerPos[1]]
+# Initialize Cursor to load on Default Characters
+Cursor = pygame.image.load('CharacterSprites/cursor.png')
+cursorPos = playerPos
 
 # Set up the Display
 pygame.init()
@@ -61,20 +60,14 @@ DISPLAYSURF = pygame.display.set_mode((MAPWIDTH*TILESIZE, MAPHEIGHT*TILESIZE+con
 while True:
 
 	cursor_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
+	cursorPos = playerPos
 
 	# Movement Cooldown Clock
 	turn_clock = clock.tick() / 1000.0
 	walk_cd -= turn_clock
 
-	step_clock = clock2.tick() / 1000.0
-	step_cd -= step_clock
-
 	if walk_cd <= 0:
 		walk_cd = 0
-	if step_cd <= 0:
-		step_cd = 0
-	
-	cursorPos = playerPos
 
 	# Get all user events
 	for event in pygame.event.get():
@@ -102,8 +95,7 @@ while True:
 			if (event.key == K_DOWN) and (playerPos[1] < MAPHEIGHT - 1):
 				playerPos[1] += 1
 
-		# Hotkes to switch between units
-#	elif (event.type == KEYDOWN):
+			# Hotkeys to switch between units
 			if (event.key == K_1):
 				PLAYER = PLAYERS[0]
 				PLAYER_NAME = PLAYER_NAMES[0]
@@ -144,12 +136,10 @@ while True:
 		# Draw the resource at that position in the tilemap
 			DISPLAYSURF.blit(textures[tilemap[row][column]], (column*TILESIZE, row*TILESIZE))
 
-	# Display player at current position
-	DISPLAYSURF.blit(Lord,(playerPos1[0]*TILESIZE,playerPos1[1]*TILESIZE))
-	DISPLAYSURF.blit(Mage,(playerPos2[0]*TILESIZE,playerPos2[1]*TILESIZE))
-	DISPLAYSURF.blit(Archer,(playerPos3[0]*TILESIZE,playerPos3[1]*TILESIZE))
-	DISPLAYSURF.blit(Bard,(playerPos4[0]*TILESIZE,playerPos4[1]*TILESIZE))
+	# Display players and cursor
 	DISPLAYSURF.blit(Cursor,(cursorPos[0]*TILESIZE,cursorPos[1]*TILESIZE))
+	for i in range(len(PLAYERS)):
+		DISPLAYSURF.blit(PLAYERS[i],(player_pos_coords[i][0]*TILESIZE,player_pos_coords[i][1]*TILESIZE))
 
 	# Display DEBUG Information
 	if DEBUG:
@@ -165,14 +155,12 @@ while True:
 		DISPLAYSURF.blit(Text_Button_Statuses,(placePosition,MAPHEIGHT*TILESIZE+30))
 
 		Text_New_Coords = INVFONT.render('Final Coordinates: ' + str(new_coord) + '  ', True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_New_Coords,(placePosition, MAPHEIGHT*TILESIZE + 45))
+		DISPLAYSURF.blit(Text_New_Coords,(placePosition, MAPHEIGHT*TILESIZE+45))
 
 		Text_Char_Selected = INVFONT.render('Currently Selected: ' + PLAYER_NAME + '        ', True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Char_Selected,(placePosition, MAPHEIGHT*TILESIZE + 60))
+		DISPLAYSURF.blit(Text_Char_Selected,(placePosition, MAPHEIGHT*TILESIZE+60))
 
-		Text_Walk_Cooldown = INVFONT.render('Movement Cooldown: ' + str(walk_cd) + (9*'       '), True, WHITE, BLACK)
+		Text_Walk_Cooldown = INVFONT.render('Current Char CD: ' + str(walk_cd) + (9*'       '), True, WHITE, BLACK)
 		DISPLAYSURF.blit(Text_Walk_Cooldown,(placePosition + 175, MAPHEIGHT*TILESIZE))
 
-		Text_Step_Cooldown = INVFONT.render('Step Cooldown: ' + str(step_cd) + (9*'         '), True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Step_Cooldown,(placePosition + 175, MAPHEIGHT*TILESIZE + 15))
 	pygame.display.update()
