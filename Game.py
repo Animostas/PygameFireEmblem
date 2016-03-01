@@ -23,21 +23,29 @@ PLAYER_NAMES = ['Lord', 'Mage', 'Archer', 'Bard']
 
 player_pos_coords = [playerPos1, playerPos2, playerPos3, playerPos4]
 
-PLAYER = PLAYERS[0]
-PLAYER_NAME = PLAYER_NAMES[0]
-playerPos = player_pos_coords[0]
-
-# Initialize Cursor
-Cursor = pygame.image.load('cursor.png')
-cursorPos = [playerPos[0],playerPos[1]]
-
 new_coord = []
 walk_delay = 1
 walk_cd = 0
 step_delay = 1
 step_cd = 0
-clock = pygame.time.Clock()
+
+#Initialize Clocks
+clock1 = pygame.time.Clock()
 clock2 = pygame.time.Clock()
+clock3 = pygame.time.Clock()
+clock4 = pygame.time.Clock()
+
+CLOCKS = [clock1, clock2, clock3, clock4]
+
+# First player is default
+PLAYER = PLAYERS[0]
+PLAYER_NAME = PLAYER_NAMES[0]
+playerPos = player_pos_coords[0]
+clock = CLOCKS[0]
+
+# Initialize Cursor
+Cursor = pygame.image.load('cursor.png')
+cursorPos = [playerPos[0],playerPos[1]]
 
 # Set up the Display
 pygame.init()
@@ -81,6 +89,7 @@ while True:
 					PLAYER = PLAYERS[i]
 					PLAYER_NAME = PLAYER_NAMES[i]
 					playerPos = player_pos_coords[i]
+					clock = CLOCKS[i]
 
 		# Keyboard Inputs (Can remove later on)
 		elif (event.type == KEYDOWN):
@@ -92,6 +101,29 @@ while True:
 				playerPos[1] -= 1
 			if (event.key == K_DOWN) and (playerPos[1] < MAPHEIGHT - 1):
 				playerPos[1] += 1
+
+		# Hotkes to switch between units
+#	elif (event.type == KEYDOWN):
+			if (event.key == K_1):
+				PLAYER = PLAYERS[0]
+				PLAYER_NAME = PLAYER_NAMES[0]
+				playerPos = player_pos_coords[0]
+				clock = CLOCKS[0]
+			if (event.key == K_2):
+				PLAYER = PLAYERS[1]
+				PLAYER_NAME = PLAYER_NAMES[1]
+				playerPos = player_pos_coords[1]
+				clock = CLOCKS[1]			
+			if (event.key == K_3):
+				PLAYER = PLAYERS[2]
+				PLAYER_NAME = PLAYER_NAMES[2]
+				playerPos = player_pos_coords[2]
+				clock = CLOCKS[2]
+			if (event.key == K_4):
+				PLAYER = PLAYERS[3]
+				PLAYER_NAME = PLAYER_NAMES[3]
+				playerPos = player_pos_coords[3]
+				clock = CLOCKS[3]
 
 		# Mouse inputs
 		elif pygame.mouse.get_pressed()[2]: 
