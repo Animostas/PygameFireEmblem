@@ -76,6 +76,7 @@ while True:
 			pygame.quit()
 			sys.exit()
 
+		# Mouse inputs
 		elif pygame.mouse.get_pressed()[0]:
 			for i in range(len(player_pos_coords)):
 				if player_pos_coords[i][0] == cursor_coord[0] and player_pos_coords[i][1] == cursor_coord[1]:
@@ -84,8 +85,19 @@ while True:
 					playerPos = player_pos_coords[i]
 					clock = CLOCKS[i]
 
-		# Keyboard Inputs (Can remove later on)
+		elif pygame.mouse.get_pressed()[2]: 
+			new_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
+			if walk_cd <= 0:
+				for i in range(len(new_coord)):
+					while playerPos[i] != new_coord[i]:
+						if new_coord[i] > playerPos[i]:
+							playerPos[i] += 1
+						if new_coord[i] < playerPos[i]:
+							playerPos[i] -= 1
+					walk_cd = walk_delay
+
 		elif (event.type == KEYDOWN):
+			# Keyboard Inputs (Can remove later on)
 			if (event.key == K_RIGHT) and (playerPos[0] < MAPWIDTH - 1):
 				playerPos[0] += 1
 			if (event.key == K_LEFT) and (playerPos[0] > 0):
@@ -117,23 +129,9 @@ while True:
 				playerPos = player_pos_coords[3]
 				clock = CLOCKS[3]
 
-		# Mouse inputs
-		elif pygame.mouse.get_pressed()[2]: 
-			new_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
-			if walk_cd <= 0:
-				for i in range(len(new_coord)):
-					while playerPos[i] != new_coord[i]:
-						if new_coord[i] > playerPos[i]:
-							playerPos[i] += 1
-						if new_coord[i] < playerPos[i]:
-							playerPos[i] -= 1
-					walk_cd = walk_delay
-
-	# Loop through each row
+	# Display map sprites
 	for row in range(MAPHEIGHT):
-		# Loop through each column in the row
 		for column in range(MAPWIDTH):
-		# Draw the resource at that position in the tilemap
 			DISPLAYSURF.blit(textures[tilemap[row][column]], (column*TILESIZE, row*TILESIZE))
 
 	# Display players and cursor
