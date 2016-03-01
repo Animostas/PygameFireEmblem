@@ -11,8 +11,10 @@ The ultimate goal is to create a working prototype for a new type of Real Time S
 
 
 
-##Current implementation
+## Current implementation
 
-1) Grid-based movement of one character with keybaord
+1) Grid-based movement of multiple characters with right-click on mouse or by keyboard
+
+2) Changing selection of character with left-click or using hotkeys (1-4)
 
 All images are owned by Nintendo
