@@ -2,49 +2,46 @@ import pygame, sys
 from pygame.locals import *
 from time import *
 from SacaeMap import *
+from Player import *
 
 # Turn Debug mode on and off
 DEBUG = True
 
+# Information for Error Handling
 WHITE = [255, 255, 255]
 BLACK = [0  , 0  , 0  ]
+RED   = [255, 0, 0]
+case  = 0
 
 # Initialize Players and Positions
-Lord = pygame.image.load('CharacterSprites/lyn.png')
-playerPos1 = [MAPWIDTH-1,MAPHEIGHT-1]
-Mage = pygame.image.load('CharacterSprites/mage.png')
-playerPos2 = [MAPWIDTH-2,MAPHEIGHT-1]
-Archer = pygame.image.load('CharacterSprites/archer.png')
-playerPos3 = [MAPWIDTH-3,MAPHEIGHT-1]
-Bard = pygame.image.load('CharacterSprites/bard.png')
-playerPos4 = [MAPWIDTH-4,MAPHEIGHT-1]
+Lord   = Player('Lord',   'CharacterSprites/lyn.png',    [10,9])
+Mage   = Player('Mage',   'CharacterSprites/mage.png',   [9,9])
+Archer = Player('Archer', 'CharacterSprites/archer.png', [8,9])
+Bard   = Player('Bard',   'CharacterSprites/bard.png',   [7,9])
 
-PLAYERS = [Lord, Mage, Archer, Bard]
-PLAYER_NAMES = ['Lord', 'Mage', 'Archer', 'Bard']
-player_pos_coords = [playerPos1, playerPos2, playerPos3, playerPos4]
+listPLAYERS = [Lord, Mage, Archer, Bard]
 
-new_coord = []
 walk_delay = 1
 walk_cd = 0
 
-#Initialize Clocks
-clock1 = pygame.time.Clock()
-clock2 = pygame.time.Clock()
-clock3 = pygame.time.Clock()
-clock4 = pygame.time.Clock()
-
-CLOCKS = [clock1, clock2, clock3, clock4]
-HOTKEYS = [Lord, Mage, Archer, Bard]
+HOTKEYS = {
+		1 : Lord, 
+		2 : Mage, 
+		3 : Archer, 
+		4 : Bard
+	  }
 
 # First player is default
-PLAYER = PLAYERS[0]
-PLAYER_NAME = PLAYER_NAMES[0]
-playerPos = player_pos_coords[0]
-clock = CLOCKS[0]
+PLAYER = listPLAYERS[0]
+PLAYER_NAME = listPLAYERS[0].name
+playerPos = listPLAYERS[0].position
+new_coord = playerPos
+clock = pygame.time.Clock()
+facing = listPLAYERS[0].facing
 
-# Initialize Cursor to load on Default Characters
+# Initialize Cursor to load on Default Character
 Cursor = pygame.image.load('CharacterSprites/cursor.png')
-cursorPos = playerPos
+cursorPos = PLAYER.position
 
 # Set up the Display
 pygame.init()
@@ -59,15 +56,12 @@ DISPLAYSURF = pygame.display.set_mode((MAPWIDTH*TILESIZE, MAPHEIGHT*TILESIZE+con
 
 while True:
 
-	cursor_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
-	cursorPos = playerPos
+	mouse_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
+	cursorPos = PLAYER.position
 
 	# Movement Cooldown Clock
 	turn_clock = clock.tick() / 1000.0
 	walk_cd -= turn_clock
-
-	if walk_cd <= 0:
-		walk_cd = 0
 
 	# Get all user events
 	for event in pygame.event.get():
@@ -78,70 +72,132 @@ while True:
 
 		# Mouse inputs
 		elif pygame.mouse.get_pressed()[0]:
-			for i in range(len(player_pos_coords)):
-				if player_pos_coords[i][0] == cursor_coord[0] and player_pos_coords[i][1] == cursor_coord[1]:
-					PLAYER = PLAYERS[i]
-					PLAYER_NAME = PLAYER_NAMES[i]
-					playerPos = player_pos_coords[i]
-					clock = CLOCKS[i]
+			for player in listPLAYERS:
+				if player.position == mouse_coord:
+					PLAYER = player
 
 		elif pygame.mouse.get_pressed()[2]: 
 			new_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
+			case = 0
+			for player in listPLAYERS:
+				if player != PLAYER:
+					if new_coord == player.position:
+						case = 3
 			if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
-				break
-			elif walk_cd <= 0:
+				case = 2
+			elif PLAYER.move_current_cd > 0:
+				case = 4
+			elif (PLAYER.move_current_cd <= 0) and (case == 0):
 				for i in range(len(new_coord)):
-					while playerPos[i] != new_coord[i]:
-						if new_coord[i] > playerPos[i]:
-							playerPos[i] += 1
-						if new_coord[i] < playerPos[i]:
-							playerPos[i] -= 1
-					walk_cd = walk_delay
+					while PLAYER.position[i] != new_coord[i]:
+						if new_coord[i] > PLAYER.position[i]:
+							PLAYER.position[i] += 1
+						if new_coord[i] < PLAYER.position[i]:
+							PLAYER.position[i] -= 1
 
 		elif (event.type == KEYDOWN):
-			# Keyboard Inputs (Can remove later on)
-			if (event.key == K_RIGHT) and (playerPos[0] < MAPWIDTH - 1):
-				new_coord = [playerPos[0]+1, playerPos[1]]
-				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
-					break
-				playerPos[0] += 1
-			if (event.key == K_LEFT) and (playerPos[0] > 0):
-				new_coord = [playerPos[0]-1, playerPos[1]]
-				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
-					break
-				playerPos[0] -= 1
-			if (event.key == K_UP) and (playerPos[1] > 0):
-				new_coord = [playerPos[0], playerPos[1]-1]
-				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
-					break
-				playerPos[1] -= 1
-			if (event.key == K_DOWN) and (playerPos[1] < MAPHEIGHT - 1):
-				new_coord = [playerPos[0], playerPos[1]+1]
-				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
-					break
-				playerPos[1] += 1
+			# Keyboard Inputs
+			if (event.key == K_RIGHT):
+				PLAYER.facing = 'RIGHT'
+				increment = 1
+				case = 0
+				new_coord = [PLAYER.position[0]+1, PLAYER.position[1]]
+				if new_coord[0] not in range(MAPWIDTH):
+					increment = 0
+					case = 1
+				elif tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					increment = 0
+					case = 2
+				else:
+					for player in listPLAYERS:
+						if new_coord == player.position:
+							increment = 0
+							case = 3
+				PLAYER.position[0] += increment
+
+			if (event.key == K_LEFT):
+				PLAYER.facing = 'LEFT'
+				increment = 1
+				case = 0
+				new_coord = [PLAYER.position[0]-1, PLAYER.position[1]]
+				if new_coord[0] not in range(MAPWIDTH):
+					increment = 0
+					case = 1
+				elif tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					increment = 0
+					case = 2
+				else:
+					for player in listPLAYERS:
+						if new_coord == player.position:
+							increment = 0
+							case = 3
+				PLAYER.position[0] -= increment
+
+			if (event.key == K_UP):
+				PLAYER.facing = 'UP'
+				increment = 1
+				case = 0
+				new_coord = [PLAYER.position[0], PLAYER.position[1]-1]
+				if new_coord[1] not in range(MAPHEIGHT):
+					increment = 0
+					case = 1
+				elif tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					increment = 0
+					case = 2
+				else:
+					for player in listPLAYERS:
+						if new_coord == player.position:
+							increment = 0
+							case = 3
+				PLAYER.position[1] -= increment
+
+			if (event.key == K_DOWN):
+				PLAYER.facing = 'DOWN'
+				increment = 1
+				case = 0
+				new_coord = [PLAYER.position[0], PLAYER.position[1]+1]
+				if new_coord[1] not in range(MAPHEIGHT):
+					increment = 0
+					case = 1
+				elif tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					increment = 0
+					case = 2
+				else:
+					for player in listPLAYERS:
+						if new_coord == player.position:
+							increment = 0
+							case = 3
+				PLAYER.position[1] += increment
+
+			# Mapping Hotkeys
+			if pygame.key.get_pressed()[pygame.K_LCTRL] or pygame.key.get_pressed()[pygame.K_RCTRL]:
+				if (event.key == K_1):
+					HOTKEYS[1] = PLAYER
+				if (event.key == K_2):
+					HOTKEYS[2] = PLAYER
+				if (event.key == K_3):
+					HOTKEYS[3] = PLAYER
+				if (event.key == K_4):
+					HOTKEYS[4] = PLAYER
 
 			# Hotkeys to switch between units
-			if (event.key == K_1):
-				PLAYER = PLAYERS[0]
-				PLAYER_NAME = PLAYER_NAMES[0]
-				playerPos = player_pos_coords[0]
-				clock = CLOCKS[0]
-			if (event.key == K_2):
-				PLAYER = PLAYERS[1]
-				PLAYER_NAME = PLAYER_NAMES[1]
-				playerPos = player_pos_coords[1]
-				clock = CLOCKS[1]			
-			if (event.key == K_3):
-				PLAYER = PLAYERS[2]
-				PLAYER_NAME = PLAYER_NAMES[2]
-				playerPos = player_pos_coords[2]
-				clock = CLOCKS[2]
-			if (event.key == K_4):
-				PLAYER = PLAYERS[3]
-				PLAYER_NAME = PLAYER_NAMES[3]
-				playerPos = player_pos_coords[3]
-				clock = CLOCKS[3]
+			else:
+				if (event.key == K_1):
+					PLAYER = HOTKEYS[1]
+					cursorPos = PLAYER.position
+					new_coord = cursorPos
+				if (event.key == K_2):
+					PLAYER = HOTKEYS[2]
+					cursorPos = PLAYER.position
+					new_coord = cursorPos
+				if (event.key == K_3):
+					PLAYER = HOTKEYS[3]
+					cursorPos = PLAYER.position
+					new_coord = cursorPos
+				if (event.key == K_4):
+					PLAYER = HOTKEYS[4]
+					cursorPos = PLAYER.position
+					new_coord = cursorPos
 
 	# Display map sprites
 	for row in range(MAPHEIGHT):
@@ -150,33 +206,53 @@ while True:
 
 	# Display players and cursor
 	DISPLAYSURF.blit(Cursor,(cursorPos[0]*TILESIZE,cursorPos[1]*TILESIZE))
-	for i in range(len(PLAYERS)):
-		DISPLAYSURF.blit(PLAYERS[i],(player_pos_coords[i][0]*TILESIZE,player_pos_coords[i][1]*TILESIZE))
+	for player in listPLAYERS:
+		DISPLAYSURF.blit(player.sprite,(player.position[0]*TILESIZE,player.position[1]*TILESIZE))
 
 	# Display DEBUG Information
 	if DEBUG:
 		placePosition = 5
-		Text_Char_Pos = INVFONT.render('Character Position: ' + str(playerPos) + '  ', True, WHITE, BLACK)
+		Text_Char_Pos = INVFONT.render('Character Position: {}'.format(PLAYER.position) + '  ', True, WHITE, BLACK)
 		DISPLAYSURF.blit(Text_Char_Pos,(placePosition,MAPHEIGHT*TILESIZE))
 
-		cursor_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
-		Text_Cursor_Pos = INVFONT.render('Cursor Position: ' + str(cursor_coord) + '  ', True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Cursor_Pos,(placePosition,MAPHEIGHT*TILESIZE+15))
+		mouse_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
+		Text_Mouse_Pos = INVFONT.render('Cursor Position: ' + str(mouse_coord) + '  ', True, WHITE, BLACK)
+		DISPLAYSURF.blit(Text_Mouse_Pos,(placePosition,MAPHEIGHT*TILESIZE+15))
 
-		Text_Button_Statuses = INVFONT.render('Mouse Buttons: ' + str(pygame.mouse.get_pressed()) + '  ', True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Button_Statuses,(placePosition,MAPHEIGHT*TILESIZE+30))
+		Text_Button_Facing = INVFONT.render('Direction Facing: ' + str(PLAYER.facing) + 9 * '  ', True, WHITE, BLACK)
+		DISPLAYSURF.blit(Text_Button_Facing,(placePosition,MAPHEIGHT*TILESIZE+30))
 
-		Text_New_Coords = INVFONT.render('Final Coordinates: ' + str(new_coord) + '  ', True, WHITE, BLACK)
+		Text_New_Coords = INVFONT.render('Desired Coordinates: ' + str(new_coord) + '  ', True, WHITE, BLACK)
 		DISPLAYSURF.blit(Text_New_Coords,(placePosition, MAPHEIGHT*TILESIZE+45))
 
-		Text_Char_Selected = INVFONT.render('Currently Selected: ' + PLAYER_NAME + '        ', True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Char_Selected,(placePosition, MAPHEIGHT*TILESIZE+60))
+		error_cases = {
+				1 : 'OUT OF BOUNDS',
+				2 : 'IMPASSABLE TERRAIN',
+				3 : 'CHARACTER OCCUPYING TILE',
+				4 : 'MOVEMENT COOLDOWN'
+			      }
+		Text_Valid = INVFONT.render(1000 * ' ', True, BLACK, BLACK)
+		if case != 0:
+			Text_Valid = INVFONT.render('INVALID COMMAND: {}'.format(error_cases[case]) + 10*'   ', True, RED, BLACK)
+		DISPLAYSURF.blit(Text_Valid,(placePosition, MAPHEIGHT*TILESIZE+60))
+			
+		Text_Char_Selected = INVFONT.render('Currently Selected: ' + PLAYER.name + '        ', True, WHITE, BLACK)
+		DISPLAYSURF.blit(Text_Char_Selected,(placePosition, MAPHEIGHT*TILESIZE+75))
 
-		Text_Walk_Cooldown = INVFONT.render('Current Char CD: ' + str(walk_cd) + (9*'       '), True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Walk_Cooldown,(placePosition + 175, MAPHEIGHT*TILESIZE))
+		Text_Hotkey1 = INVFONT.render('1 : {}'.format(HOTKEYS[1].name) + 5*'  ', True, WHITE, BLACK)
+		Text_Hotkey2 = INVFONT.render('2 : {}'.format(HOTKEYS[2].name) + 5*'  ', True, WHITE, BLACK)
+		Text_Hotkey3 = INVFONT.render('3 : {}'.format(HOTKEYS[3].name) + 5*'  ', True, WHITE, BLACK)
+		Text_Hotkey4 = INVFONT.render('4 : {}'.format(HOTKEYS[4].name) + 5*'  ', True, WHITE, BLACK)
+		DISPLAYSURF.blit(Text_Hotkey1,(placePosition + 200, MAPHEIGHT * TILESIZE))
+		DISPLAYSURF.blit(Text_Hotkey2,(placePosition + 200, MAPHEIGHT * TILESIZE + 15))
+		DISPLAYSURF.blit(Text_Hotkey3,(placePosition + 200, MAPHEIGHT * TILESIZE + 30))
+		DISPLAYSURF.blit(Text_Hotkey4,(placePosition + 200, MAPHEIGHT * TILESIZE + 45))
 
-		current_terrain = terrains[tilemap[playerPos[1]][playerPos[0]]]
+#		Text_Walk_Cooldown = INVFONT.render('Current Char CD: ' + str(PLAYER.move_current_cd) + (20*' '), True, WHITE, BLACK)
+#		DISPLAYSURF.blit(Text_Walk_Cooldown,(placePosition + 175, MAPHEIGHT*TILESIZE))
+
+		current_terrain = terrains[tilemap[PLAYER.position[1]][PLAYER.position[0]]]
 		Text_Terrain = INVFONT.render('Terrain: ' + str(current_terrain) + (9*'  '), True, WHITE, BLACK)
-		DISPLAYSURF.blit(Text_Terrain,(placePosition, MAPHEIGHT*TILESIZE+75))
+		DISPLAYSURF.blit(Text_Terrain,(placePosition, MAPHEIGHT*TILESIZE+90))
 
 	pygame.display.update()
