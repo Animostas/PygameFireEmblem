@@ -87,7 +87,9 @@ while True:
 
 		elif pygame.mouse.get_pressed()[2]: 
 			new_coord = [pygame.mouse.get_pos()[0]/TILESIZE, pygame.mouse.get_pos()[1]/TILESIZE]
-			if walk_cd <= 0:
+			if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+				break
+			elif walk_cd <= 0:
 				for i in range(len(new_coord)):
 					while playerPos[i] != new_coord[i]:
 						if new_coord[i] > playerPos[i]:
@@ -99,12 +101,24 @@ while True:
 		elif (event.type == KEYDOWN):
 			# Keyboard Inputs (Can remove later on)
 			if (event.key == K_RIGHT) and (playerPos[0] < MAPWIDTH - 1):
+				new_coord = [playerPos[0]+1, playerPos[1]]
+				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					break
 				playerPos[0] += 1
 			if (event.key == K_LEFT) and (playerPos[0] > 0):
+				new_coord = [playerPos[0]-1, playerPos[1]]
+				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					break
 				playerPos[0] -= 1
 			if (event.key == K_UP) and (playerPos[1] > 0):
+				new_coord = [playerPos[0], playerPos[1]-1]
+				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					break
 				playerPos[1] -= 1
 			if (event.key == K_DOWN) and (playerPos[1] < MAPHEIGHT - 1):
+				new_coord = [playerPos[0], playerPos[1]+1]
+				if tilemap[new_coord[1]][new_coord[0]] not in PASSABLE:
+					break
 				playerPos[1] += 1
 
 			# Hotkeys to switch between units
@@ -160,5 +174,9 @@ while True:
 
 		Text_Walk_Cooldown = INVFONT.render('Current Char CD: ' + str(walk_cd) + (9*'       '), True, WHITE, BLACK)
 		DISPLAYSURF.blit(Text_Walk_Cooldown,(placePosition + 175, MAPHEIGHT*TILESIZE))
+
+		current_terrain = terrains[tilemap[playerPos[1]][playerPos[0]]]
+		Text_Terrain = INVFONT.render('Terrain: ' + str(current_terrain) + (9*'  '), True, WHITE, BLACK)
+		DISPLAYSURF.blit(Text_Terrain,(placePosition, MAPHEIGHT*TILESIZE+75))
 
 	pygame.display.update()

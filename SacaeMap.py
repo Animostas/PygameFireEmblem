@@ -19,6 +19,26 @@ LEDGE2    = 14
 LEDGE3    = 15
 HUT       = 16
 
+terrains =  {
+		0  : 'GRASS',
+		1  : 'MOUNTAIN1',
+		2  : 'MOUNTAIN2',
+		3  : 'TEMPLE00',
+		4  : 'TEMPLE01',
+		5  : 'TEMPLE02',
+		6  : 'TEMPLE10',
+		7  : 'TEMPLE11',
+		8  : 'TEMPLE12',
+		9  : 'TEMPLE20',
+		10 : 'TEMPLE21',
+		11 : 'TEMPLE22',
+		12 : 'TREE',
+		13 : 'LEDGE1',
+		14 : 'LEDGE2',
+		15 : 'LEDGE3',
+		16 : 'HUT'
+	     }
+
 # Dictionary linking resouces to textures
 textures = {
              GRASS     : pygame.image.load('Textures/grass.png'),
@@ -53,6 +73,10 @@ tilemap = [
             [LEDGE2,    GRASS,     GRASS,    GRASS,    GRASS,    GRASS, GRASS, GRASS, GRASS, TREE,      GRASS    ],
             [LEDGE3,    GRASS,     TREE,     GRASS,    GRASS,    GRASS, GRASS, GRASS, GRASS, GRASS,     HUT      ]
           ]
+
+# Walls
+PASSABLE     = [MOUNTAIN1, MOUNTAIN2, GRASS, TREE, HUT, TEMPLE21]
+NOT_PASSABLE = [LEDGE1, LEDGE2, LEDGE3, TEMPLE00, TEMPLE01, TEMPLE02, TEMPLE10, TEMPLE11, TEMPLE12, TEMPLE20, TEMPLE21, TEMPLE22]
 
 # Game Dimensions
 TILESIZE = 32
