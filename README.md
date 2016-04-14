@@ -1,7 +1,11 @@
 # PygameFireEmblem
 Fire Emblem created in PyGame. To run, run Game.py
 
-The ultimate goal is to create a working prototype for a new type of Real Time Strategy game, using Fire Emblem as a basis. It will contain the following features:
+The ultimate goal is to create a working prototype for a new type of Real Time Strategy game, using Fire Emblem as a basis. Our most up-to-date game in Unity can be found here:
+
+https://github.com/synapsii/TempestTacticsPrototype
+
+It will contain the following features:
 
 1) Cooldown-based movement, primarily with mouse
 
